@@ -18,6 +18,12 @@ spec:
       containers:
       - name: ssh-container
         image: ncote/ubuntu-ssh:v11
+        securityContext:
+          capabilities:
+            add:
+              - SYS_CHROOT
+              - SETUID
+              - SETGID
         env:
         - name: SSH_USER_NCOTE_KEY
           valueFrom:
