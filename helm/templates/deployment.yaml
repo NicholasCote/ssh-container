@@ -40,8 +40,5 @@ spec:
             UsePAM no
             PrintLastLog no
             PrintMotd no
-            UseLogin no
-            UseDNS no
-            X11Forwarding no
         ports:
         - containerPort: 22
