@@ -2,7 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.app.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.app.name }}
+    group: {{ .Values.app.group }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
   template:
     spec:
       containers:
