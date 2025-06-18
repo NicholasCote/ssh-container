@@ -30,5 +30,7 @@ spec:
           value: "/bin/bash"
         - name: SSH_USER_NCOTE_GROUPS
           value: "sudo"
+        - name: SSH_CONFIG
+            value: "UsePrivilegeSeparation no"
         ports:
         - containerPort: 22
