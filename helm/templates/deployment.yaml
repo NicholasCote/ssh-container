@@ -7,9 +7,6 @@ metadata:
     app: {{ .Values.app.name }}
     group: {{ .Values.app.name }}
 spec:
-  selector:
-    matchLabels:
-      app: {{ .Values.app.name }}
   template:
     spec:
       containers:
