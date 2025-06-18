@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.app.name }}
-    group: {{ .Values.app.group }}
+    group: {{ .Values.app.name }}
 spec:
   selector:
     matchLabels:
