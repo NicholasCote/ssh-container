@@ -20,7 +20,7 @@ spec:
         image: ncote/ubuntu-ssh:v11
         env:
         - name: DEBUG_SSH
-            value: "true"
+          value: "true"
         - name: SSH_USER_NCOTE_KEY
           valueFrom:
             secretKeyRef:
