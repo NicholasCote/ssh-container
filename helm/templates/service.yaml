@@ -4,6 +4,7 @@ metadata:
   name: {{ .Values.app.name }}-external
   namespace: {{ .Release.Namespace }}
   labels:
+    group: {{ .Values.app.name }}
     cirrus/lb: internal
   annotations:
     external-dns.alpha.kubernetes.io/hostname: "{{ .Values.app.name }}.k8s.ucar.edu"
@@ -14,3 +15,5 @@ spec:
   - port: 22
     targetPort: 22
     protocol: TCP
+  selector:
+    app: {{ .Values.app.name }}
