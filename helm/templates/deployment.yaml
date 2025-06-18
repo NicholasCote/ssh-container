@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: ssh-container
+        image: ncote/ubuntu-ssh:v11
+        env:
+        - name: SSH_USER_NCOTE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.app.name }}-ssh-key
+              key: ssh-key
+        - name: SSH_USER_NCOTE_SHELL
+          value: "/bin/bash"
+        - name: SSH_USER_NCOTE_GROUPS
+          value: "sudo"
+        ports:
+        - containerPort: 22

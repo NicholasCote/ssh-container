@@ -1,0 +1,4 @@
+app:
+  name: ncote-ssh-test
+  secretPath: ncote-ssh-test
+  sshKeyKey: ssh-key
