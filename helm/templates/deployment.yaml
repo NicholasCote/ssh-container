@@ -19,13 +19,9 @@ spec:
       - name: ssh-container
         image: ncote/ubuntu-ssh:v11
         securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
           capabilities:
             add:
-              - SYS_CHROOT
-            drop:
-              - ALL
+                - SYS_CHROOT
         env:
         - name: DEBUG_SSH
           value: "true"
