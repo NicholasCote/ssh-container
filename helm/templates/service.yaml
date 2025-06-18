@@ -12,7 +12,8 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 2222
+  - name: ssh
+    port: 2222
     targetPort: 22
     protocol: TCP
   selector:
