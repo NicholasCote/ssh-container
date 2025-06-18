@@ -9,7 +9,7 @@ spec:
     name: user-ro
     kind: SecretStore
   target:
-    name: {{ .Values.db.name }}-ssh-key
+    name: {{ .Values.app.name }}-ssh-key
   data:
     - secretKey: ssh-key
       remoteRef:
