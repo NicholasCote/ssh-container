@@ -52,8 +52,8 @@ create_ssh_user() {
         useradd -m -s "$user_shell" "$username" 2>/dev/null || true
     fi
     
-    # IMPORTANT: Unlock the user account for SSH access
-    passwd -u "$username" 2>/dev/null || true
+    # CRITICAL FIX: Set password to unlocked but disabled state
+    usermod -p '*' "$username"
     
     # Add user to additional groups if specified
     if [[ -n "$user_groups" ]]; then
@@ -113,11 +113,21 @@ if [[ -n "$SSH_USERS" ]]; then
     done
 fi
 
+# Debug: Show all SSH_USER environment variables
+echo "Debug: All SSH_USER environment variables:"
+env | grep '^SSH_USER' || echo "No SSH_USER variables found"
+
 # Process individual user environment variables
 # SSH_USER_<USERNAME>_KEY, SSH_USER_<USERNAME>_SHELL, etc.
-for var in $(env | grep '^SSH_USER_.*_KEY=' | cut -d= -f1); do
-    # Extract username from variable name (SSH_USER_JOHN_KEY -> JOHN)
+echo "Debug: Looking for SSH_USER_*_KEY variables..."
+env_vars=$(env | grep '^SSH_USER_.*_KEY=' | cut -d= -f1)
+echo "Debug: Found key variables: $env_vars"
+
+for var in $env_vars; do
+    echo "Debug: Processing variable: $var"
+    # Extract username from variable name (SSH_USER_NCOTE_KEY -> ncote)
     username=$(echo "$var" | sed 's/SSH_USER_\(.*\)_KEY/\1/' | tr '[:upper:]' '[:lower:]')
+    echo "Debug: Extracted username: $username"
     
     # Get user configuration
     key_var="SSH_USER_${username^^}_KEY"
@@ -126,16 +136,25 @@ for var in $(env | grep '^SSH_USER_.*_KEY=' | cut -d= -f1); do
     uid_var="SSH_USER_${username^^}_UID"
     gid_var="SSH_USER_${username^^}_GID"
     
+    echo "Debug: Looking for variables: $key_var, $shell_var, $groups_var"
+    
     ssh_key_b64="${!key_var}"
     user_shell="${!shell_var:-/bin/bash}"
     user_groups="${!groups_var:-}"
     user_uid="${!uid_var:-}"
     user_gid="${!gid_var:-}"
     
+    echo "Debug: ssh_key_b64 length: ${#ssh_key_b64}"
+    echo "Debug: user_shell: $user_shell"
+    echo "Debug: user_groups: $user_groups"
+    
     if [[ -n "$ssh_key_b64" ]]; then
+        echo "Debug: SSH key found, creating user..."
         # Decode base64 SSH key
         ssh_key=$(echo "$ssh_key_b64" | base64 -d)
         create_ssh_user "$username" "$ssh_key" "$user_shell" "$user_groups" "$user_uid" "$user_gid"
+    else
+        echo "Debug: No SSH key found for user $username"
     fi
 done
 
@@ -170,8 +189,9 @@ echo "Starting SSH daemon..."
 
 # Check if DEBUG mode is enabled
 if [[ "$DEBUG_SSH" == "true" ]]; then
-    echo "Starting SSH daemon in debug mode..."
-    exec /usr/sbin/sshd -D -d -p ${SSH_PORT:-22}
+    echo "Starting SSH daemon in debug mode (will stay running)..."
+    # Use -e instead of -d to keep daemon running after connections
+    exec /usr/sbin/sshd -D -e -p ${SSH_PORT:-22}
 else
     exec /usr/sbin/sshd -D -p ${SSH_PORT:-22}
 fi
