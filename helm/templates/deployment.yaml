@@ -7,10 +7,13 @@ metadata:
     app: {{ .Values.app.name }}
     group: {{ .Values.app.name }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.webapp.name }}
+        app: {{ .Values.app.name }}
     spec:
       containers:
       - name: ssh-container
