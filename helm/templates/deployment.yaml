@@ -35,6 +35,11 @@ spec:
         - name: SSH_USER_NCOTE_GROUPS
           value: "sudo"
         - name: SSH_CONFIG
-          value: "UsePrivilegeSeparation no"
+          value: |
+            LogLevel DEBUG3
+            ForceCommand /bin/echo "Shell test successful"
+            UsePAM no
+            PrintLastLog no
+            PrintMotd no
         ports:
         - containerPort: 22
