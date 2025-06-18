@@ -8,6 +8,9 @@ metadata:
     group: {{ .Values.app.name }}
 spec:
   template:
+    metadata:
+      labels:
+        app: {{ .Values.webapp.name }}
     spec:
       containers:
       - name: ssh-container
