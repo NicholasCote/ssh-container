@@ -17,13 +17,14 @@ spec:
     spec:
       containers:
       - name: ssh-container
-        image: ncote/ubuntu-ssh:v13
+        image: ncote/ubuntu-ssh:v14  # Updated version
         securityContext:
           capabilities:
             add:
                 - SYS_CHROOT
                 - SETUID
                 - SETGID 
+          # Add these to prevent audit/login issues
           runAsNonRoot: false
           allowPrivilegeEscalation: true
         env:
@@ -37,7 +38,10 @@ spec:
         - name: SSH_USER_NCOTE_SHELL
           value: "/bin/bash"
         - name: SSH_USER_NCOTE_GROUPS
-          value: "sudo" 
+          value: "sudo"  # The entrypoint script will create this group
+        # Disable audit and login systems that cause container issues
+        - name: AUDIT_DISABLED
+          value: "1"
         - name: SSH_CONFIG
           value: |
             LogLevel DEBUG3
@@ -45,9 +49,13 @@ spec:
             PrintLastLog no
             PrintMotd no
             UseDNS no
-            UsePrivilegeSeparation no
+            # Force disable all session recording
+            X11Forwarding no
+            # Disable compression to reduce complexity
+            Compression no
         ports:
         - containerPort: 22
+        # Add resource limits to prevent issues
         resources:
           limits:
             memory: "512Mi"

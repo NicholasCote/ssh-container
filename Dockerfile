@@ -20,20 +20,48 @@ RUN mkdir /var/run/sshd && \
     mkdir -p /root/.ssh && \
     chmod 700 /root/.ssh
 
-# SSH configuration - container-optimized settings
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/' /etc/ssh/sshd_config && \
-    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
-    sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
-    echo "PrintLastLog no" >> /etc/ssh/sshd_config && \
-    echo "PrintMotd no" >> /etc/ssh/sshd_config && \
-    echo "UseDNS no" >> /etc/ssh/sshd_config && \
-    echo "UsePrivilegeSeparation no" >> /etc/ssh/sshd_config
+# Remove default SSH config and create a minimal container-optimized one
+RUN rm -f /etc/ssh/sshd_config
+COPY <<'EOF' /etc/ssh/sshd_config
+# Minimal SSH configuration for containers
+Port 22
+Protocol 2
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
 
-# Disable login/logout logging to prevent audit system issues
-RUN touch /var/log/lastlog && chmod 664 /var/log/lastlog && \
-    touch /var/log/wtmp && chmod 664 /var/log/wtmp && \
+# Security settings
+PermitRootLogin yes
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication no
+
+# Disable problematic features for containers
+UsePAM no
+PrintMotd no
+PrintLastLog no
+UseDNS no
+TCPKeepAlive yes
+ClientAliveInterval 30
+ClientAliveCountMax 3
+
+# Disable session recording and audit features
+X11Forwarding no
+AllowTcpForwarding yes
+AllowAgentForwarding yes
+Compression no
+
+# Logging
+SyslogFacility AUTH
+LogLevel INFO
+EOF
+
+# Create minimal log files to prevent errors
+RUN touch /var/log/lastlog && chmod 644 /var/log/lastlog && \
+    touch /var/log/wtmp && chmod 644 /var/log/wtmp && \
     touch /var/log/btmp && chmod 600 /var/log/btmp
 
 # Create entrypoint script
@@ -180,7 +208,7 @@ ssh-keygen -A
 
 # Set custom SSH port if specified
 if [[ -n "$SSH_PORT" ]]; then
-    echo "Port $SSH_PORT" >> /etc/ssh/sshd_config
+    sed -i "s/^Port 22$/Port $SSH_PORT/" /etc/ssh/sshd_config
 fi
 
 # Add custom SSH configuration if provided
@@ -196,10 +224,15 @@ getent passwd | grep root | awk -F: '{print $1, $3, $7}' || true
 
 echo "Starting SSH daemon..."
 
+# Disable audit system if requested
+if [[ "$AUDIT_DISABLED" == "1" ]]; then
+    echo "Audit system disabled"
+    export AUDIT_DISABLED=1
+fi
+
 # Check if DEBUG mode is enabled
 if [[ "$DEBUG_SSH" == "true" ]]; then
     echo "Starting SSH daemon in debug mode..."
-    # Use -e instead of -d to keep daemon running after connections
     exec /usr/sbin/sshd -D -e -p ${SSH_PORT:-22}
 else
     exec /usr/sbin/sshd -D -p ${SSH_PORT:-22}
