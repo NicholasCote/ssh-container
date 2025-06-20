@@ -1,22 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.app.name }}
+  name: {{ .Values.app.name }}-ssh
   namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Values.app.name }}
-    group: {{ .Values.app.name }}
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.app.name }}
+      app: {{ .Values.app.name }}-ssh
   template:
     metadata:
       labels:
-        app: {{ .Values.app.name }}
+        app: {{ .Values.app.name }}-ssh
     spec:
       containers:
-      - name: ssh-container
+      - name: ssh-server
         image: lscr.io/linuxserver/openssh-server:latest
         ports:
         - containerPort: 2222
@@ -28,17 +26,18 @@ spec:
         - name: TZ
           value: "Etc/UTC"
         - name: PUBLIC_KEY_FILE
-          value: "/config/authorized_keys"
+          value: "/tmp/authorized_keys"
         - name: USER_NAME
-          value: "ncote"
+          value: "sshuser"  # or {{ .Values.ssh.username | default "sshuser" }}
         - name: USER_PASSWORD_FILE
           value: "/dev/null"  # Disable password auth, keys only
         volumeMounts:
         - name: ssh-keys
-          mountPath: /config
+          mountPath: /tmp/authorized_keys
+          subPath: authorized_keys
           readOnly: true
-        - name: ssh-host-keys
-          mountPath: /config/ssh_host_keys
+        - name: config-volume
+          mountPath: /config
         resources:
           limits:
             cpu: 200m
@@ -53,8 +52,8 @@ spec:
           items:
           - key: ssh-key
             path: authorized_keys
-            mode: 0600
-      - name: ssh-host-keys
+            mode: 0644
+      - name: config-volume
         emptyDir: {}
       securityContext:
         runAsNonRoot: false  # SSH server needs to run as root initially
