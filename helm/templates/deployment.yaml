@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: ssh-container
-        image: ncote/ubuntu-ssh:v14  # Updated version
+        image: ncote/ubuntu-ssh:v12  # Updated version
         securityContext:
           capabilities:
             add:
@@ -29,7 +29,7 @@ spec:
           allowPrivilegeEscalation: true
         env:
         - name: DEBUG_SSH
-          value: "true"
+          value: "false"  # Disable debug to reduce noise
         - name: SSH_USER_NCOTE_KEY
           valueFrom:
             secretKeyRef:
@@ -38,21 +38,19 @@ spec:
         - name: SSH_USER_NCOTE_SHELL
           value: "/bin/bash"
         - name: SSH_USER_NCOTE_GROUPS
-          value: "sudo"  # The entrypoint script will create this group
-        # Disable audit and login systems that cause container issues
-        - name: AUDIT_DISABLED
-          value: "1"
+          value: "sudo"
+        # Critical: Completely bypass login subsystem
         - name: SSH_CONFIG
           value: |
-            LogLevel DEBUG3
+            LogLevel QUIET
             UsePAM no
             PrintLastLog no
             PrintMotd no
             UseDNS no
-            # Force disable all session recording
             X11Forwarding no
-            # Disable compression to reduce complexity
             Compression no
+            # Force simple session without login recording
+            ForceCommand /bin/bash -l
         ports:
         - containerPort: 22
         # Add resource limits to prevent issues
