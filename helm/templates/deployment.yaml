@@ -22,6 +22,8 @@ spec:
           capabilities:
             add:
                 - SYS_CHROOT
+                - SETUID
+                - SETGID 
         env:
         - name: DEBUG_SSH
           value: "true"
