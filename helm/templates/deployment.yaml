@@ -17,47 +17,45 @@ spec:
     spec:
       containers:
       - name: ssh-container
-        image: ncote/ubuntu-ssh:v12  # Updated version
-        securityContext:
-          capabilities:
-            add:
-                - SYS_CHROOT
-                - SETUID
-                - SETGID 
-          # Add these to prevent audit/login issues
-          runAsNonRoot: false
-          allowPrivilegeEscalation: true
-        env:
-        - name: DEBUG_SSH
-          value: "false"  # Disable debug to reduce noise
-        - name: SSH_USER_NCOTE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.app.name }}-ssh-key
-              key: ssh-key
-        - name: SSH_USER_NCOTE_SHELL
-          value: "/bin/bash"
-        - name: SSH_USER_NCOTE_GROUPS
-          value: "sudo"
-        # Critical: Completely bypass login subsystem
-        - name: SSH_CONFIG
-          value: |
-            LogLevel QUIET
-            UsePAM no
-            PrintLastLog no
-            PrintMotd no
-            UseDNS no
-            X11Forwarding no
-            Compression no
-            # Force simple session without login recording
-            ForceCommand /bin/bash -l
+        image: lscr.io/linuxserver/openssh-server:latest
         ports:
-        - containerPort: 22
-        # Add resource limits to prevent issues
+        - containerPort: 2222
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Etc/UTC"
+        - name: PUBLIC_KEY_FILE
+          value: "/config/authorized_keys"
+        - name: USER_NAME
+          value: "sshuser"  # or {{ .Values.ssh.username | default "sshuser" }}
+        - name: USER_PASSWORD_FILE
+          value: "/dev/null"  # Disable password auth, keys only
+        volumeMounts:
+        - name: ssh-keys
+          mountPath: /config
+          readOnly: true
+        - name: ssh-host-keys
+          mountPath: /config/ssh_host_keys
         resources:
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            cpu: 200m
+            memory: 128Mi
           requests:
-            memory: "256Mi"
-            cpu: "100m"
+            cpu: 100m
+            memory: 64Mi
+      volumes:
+      - name: ssh-keys
+        secret:
+          secretName: {{ .Values.app.name }}-ssh-key
+          items:
+          - key: ssh-key
+            path: authorized_keys
+            mode: 0600
+      - name: ssh-host-keys
+        emptyDir: {}
+      securityContext:
+        runAsNonRoot: false  # SSH server needs to run as root initially
+        fsGroup: 1000
