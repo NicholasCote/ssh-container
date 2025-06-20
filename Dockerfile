@@ -20,15 +20,21 @@ RUN mkdir /var/run/sshd && \
     mkdir -p /root/.ssh && \
     chmod 700 /root/.ssh
 
-# SSH configuration - disable problematic features
+# SSH configuration - container-optimized settings
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
     sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/' /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
     sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
-    echo "UseLogin no" >> /etc/ssh/sshd_config && \
     echo "PrintLastLog no" >> /etc/ssh/sshd_config && \
-    echo "PrintMotd no" >> /etc/ssh/sshd_config
+    echo "PrintMotd no" >> /etc/ssh/sshd_config && \
+    echo "UseDNS no" >> /etc/ssh/sshd_config && \
+    echo "UsePrivilegeSeparation no" >> /etc/ssh/sshd_config
+
+# Disable login/logout logging to prevent audit system issues
+RUN touch /var/log/lastlog && chmod 664 /var/log/lastlog && \
+    touch /var/log/wtmp && chmod 664 /var/log/wtmp && \
+    touch /var/log/btmp && chmod 600 /var/log/btmp
 
 # Create entrypoint script
 COPY <<'EOF' /entrypoint.sh

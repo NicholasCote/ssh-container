@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: ssh-container
-        image: ncote/ubuntu-ssh:v12
+        image: ncote/ubuntu-ssh:v13
         securityContext:
           capabilities:
             add:
@@ -37,14 +37,21 @@ spec:
         - name: SSH_USER_NCOTE_SHELL
           value: "/bin/bash"
         - name: SSH_USER_NCOTE_GROUPS
-          value: "sudo"
+          value: "sudo" 
         - name: SSH_CONFIG
           value: |
             LogLevel DEBUG3
             UsePAM no
-            UseLogin no
             PrintLastLog no
             PrintMotd no
             UseDNS no
+            UsePrivilegeSeparation no
         ports:
         - containerPort: 22
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
