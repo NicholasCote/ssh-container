@@ -30,7 +30,7 @@ spec:
         - name: PUBLIC_KEY_FILE
           value: "/config/authorized_keys"
         - name: USER_NAME
-          value: "sshuser"  # or {{ .Values.ssh.username | default "sshuser" }}
+          value: "ncote"
         - name: USER_PASSWORD_FILE
           value: "/dev/null"  # Disable password auth, keys only
         volumeMounts:
