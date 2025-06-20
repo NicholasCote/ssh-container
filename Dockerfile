@@ -20,12 +20,15 @@ RUN mkdir /var/run/sshd && \
     mkdir -p /root/.ssh && \
     chmod 700 /root/.ssh
 
-# SSH configuration
+# SSH configuration - disable problematic features
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
     sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/' /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
-    sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
+    sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
+    echo "UseLogin no" >> /etc/ssh/sshd_config && \
+    echo "PrintLastLog no" >> /etc/ssh/sshd_config && \
+    echo "PrintMotd no" >> /etc/ssh/sshd_config
 
 # Create entrypoint script
 COPY <<'EOF' /entrypoint.sh
@@ -189,7 +192,7 @@ echo "Starting SSH daemon..."
 
 # Check if DEBUG mode is enabled
 if [[ "$DEBUG_SSH" == "true" ]]; then
-    echo "Starting SSH daemon in debug mode (will stay running)..."
+    echo "Starting SSH daemon in debug mode..."
     # Use -e instead of -d to keep daemon running after connections
     exec /usr/sbin/sshd -D -e -p ${SSH_PORT:-22}
 else

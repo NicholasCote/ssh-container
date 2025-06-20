@@ -17,13 +17,15 @@ spec:
     spec:
       containers:
       - name: ssh-container
-        image: ncote/ubuntu-ssh:v11
+        image: ncote/ubuntu-ssh:v12
         securityContext:
           capabilities:
             add:
                 - SYS_CHROOT
                 - SETUID
                 - SETGID 
+          runAsNonRoot: false
+          allowPrivilegeEscalation: true
         env:
         - name: DEBUG_SSH
           value: "true"
@@ -40,7 +42,9 @@ spec:
           value: |
             LogLevel DEBUG3
             UsePAM no
+            UseLogin no
             PrintLastLog no
             PrintMotd no
+            UseDNS no
         ports:
         - containerPort: 22
