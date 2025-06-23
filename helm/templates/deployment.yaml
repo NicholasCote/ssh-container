@@ -25,7 +25,7 @@ spec:
           value: "1000"
         - name: TZ
           value: "Etc/UTC"
-        - name: PUBLIC_KEY_FILE
+        - name: PUBLIC_KEY
           valueFrom:
             secretKeyRef:
               name: {{ .Values.app.name }}-ssh-key
