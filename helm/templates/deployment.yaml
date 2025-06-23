@@ -31,7 +31,10 @@ spec:
               name: {{ .Values.app.name }}-ssh-key
               key: ssh-key
         - name: USER_PASSWORD
-          value: "da5id676"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.app.name }}-ssh-key
+              key: password
         - name: USER_NAME
           value: "ncote"
         - name: PASSWORD_ACCESS
