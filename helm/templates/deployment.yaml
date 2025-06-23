@@ -25,20 +25,18 @@ spec:
           value: "1000"
         - name: TZ
           value: "Etc/UTC"
-        - name: PUBLIC_KEY
+        - name: PASSWORD_ACCESS
+          value: "true"
+        - name: USER_NAME
           valueFrom:
             secretKeyRef:
               name: {{ .Values.app.name }}-ssh-key
-              key: ssh-key
+              key: username
         - name: USER_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Values.app.name }}-ssh-key
               key: password
-        - name: USER_NAME
-          value: "ncote"
-        - name: PASSWORD_ACCESS
-          value: "true"  # Disable password auth, keys only
         resources:
           limits:
             cpu: 200m

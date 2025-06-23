@@ -15,6 +15,10 @@ spec:
       remoteRef:
         key: {{ .Values.app.secretPath }}
         property: {{ .Values.app.sshKeyKey }}
+    - secretKey: username
+      remoteRef:
+        key: {{ .Values.app.secretPath }}
+        property: username
     - secretKey: password
       remoteRef:
         key: {{ .Values.app.secretPath }}
