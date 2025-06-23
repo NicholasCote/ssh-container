@@ -17,4 +17,4 @@ spec:
     targetPort: 2222
     protocol: TCP
   selector:
-    app: {{ .Values.app.name }}
+    app: {{ .Values.app.name }}-ssh
