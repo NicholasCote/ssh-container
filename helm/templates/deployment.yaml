@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ssh-server
-        image: {{ .Values.app.image }}:{{ .Values.app.image.tag }}
+        image: {{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}
         ports:
         - containerPort: {{ .Values.app.image.port }}
         env:

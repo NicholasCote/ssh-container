@@ -6,16 +6,16 @@ metadata:
 spec:
   refreshInterval: 1h
   secretStoreRef:
-    name: user-ro
+    name: {{ .Values.app.secret.secretStoreName }}
     kind: SecretStore
   target:
     name: {{ .Values.app.name }}-secrets
   data:
     - secretKey: {{ .Values.app.name }}-username
       remoteRef:
-        key: {{ .Values.app.secretPath }}
-        property: username
+        key: {{ .Values.app.secret.path }}
+        property: {{ .Values.app.secret.usernameKey }}
     - secretKey: {{ .Values.app.name }}-password
       remoteRef:
-        key: {{ .Values.app.secretPath }}
-        property: password
+        key: {{ .Values.app.secret.path }}
+        property: {{ .Values.app.secret.passwordKey }}
