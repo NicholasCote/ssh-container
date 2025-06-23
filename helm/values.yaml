@@ -1,6 +1,7 @@
 app:
   name: ncote-ssh-test
-  image: lscr.io/linuxserver/openssh-server:latest
+  image: lscr.io/linuxserver/openssh-server
+    tag: latest
     port: 2222
   secretPath: ncote@ucar.edu/ncote-ssh-test
     usernameKey: username
