@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.app.name }}-ssh
+  name: {{ .Values.app.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.app.name }}-ssh
+      app: {{ .Values.app.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.app.name }}-ssh
+        app: {{ .Values.app.name }}
     spec:
       containers:
       - name: ssh-server
-        image: lscr.io/linuxserver/openssh-server:latest
+        image: {{ .Values.app.image }}
         ports:
-        - containerPort: 2222
+        - containerPort: {{ .Values.app.image.port }}
         env:
         - name: PUID
           value: "1000"
@@ -30,13 +30,13 @@ spec:
         - name: USER_NAME
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.app.name }}-ssh-key
-              key: username
+              name: {{ .Values.app.name }}-secrets
+              key: {{ .Values.app.name }}-username
         - name: USER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.app.name }}-ssh-key
-              key: password
+              name: {{ .Values.app.name }}-secrets
+              key: {{ .Values.app.name }}-password
         resources:
           limits:
             cpu: 200m

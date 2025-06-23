@@ -1,7 +1,7 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: {{ .Values.app.name }}-ssh-key
+  name: {{ .Values.app.name }}-secrets
   namespace: {{ .Release.Namespace }}
 spec:
   refreshInterval: 1h
@@ -9,17 +9,13 @@ spec:
     name: user-ro
     kind: SecretStore
   target:
-    name: {{ .Values.app.name }}-ssh-key
+    name: {{ .Values.app.name }}-secrets
   data:
-    - secretKey: ssh-key
-      remoteRef:
-        key: {{ .Values.app.secretPath }}
-        property: {{ .Values.app.sshKeyKey }}
-    - secretKey: username
+    - secretKey: {{ .Values.app.name }}-username
       remoteRef:
         key: {{ .Values.app.secretPath }}
         property: username
-    - secretKey: password
+    - secretKey: {{ .Values.app.name }}-password
       remoteRef:
         key: {{ .Values.app.secretPath }}
         property: password
