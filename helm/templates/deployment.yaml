@@ -30,10 +30,12 @@ spec:
             secretKeyRef:
               name: {{ .Values.app.name }}-ssh-key
               key: ssh-key
+        - name: USER_PASSWORD
+          value: "da5id676"
         - name: USER_NAME
           value: "ncote"
         - name: PASSWORD_ACCESS
-          value: "false"  # Disable password auth, keys only
+          value: "true"  # Disable password auth, keys only
         resources:
           limits:
             cpu: 200m
