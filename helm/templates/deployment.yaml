@@ -26,18 +26,14 @@ spec:
         - name: TZ
           value: "Etc/UTC"
         - name: PUBLIC_KEY_FILE
-          value: "/tmp/authorized_keys"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.app.name }}-ssh-key
+              key: ssh-key
         - name: USER_NAME
           value: "ncote"
-        - name: USER_PASSWORD_FILE
-          value: "/dev/null"  # Disable password auth, keys only
-        volumeMounts:
-        - name: ssh-keys
-          mountPath: /tmp/authorized_keys
-          subPath: authorized_keys
-          readOnly: true
-        - name: config-volume
-          mountPath: /config
+        - name: PASSWORD_ACCESS
+          value: "false"  # Disable password auth, keys only
         resources:
           limits:
             cpu: 200m
@@ -45,16 +41,3 @@ spec:
           requests:
             cpu: 100m
             memory: 64Mi
-      volumes:
-      - name: ssh-keys
-        secret:
-          secretName: {{ .Values.app.name }}-ssh-key
-          items:
-          - key: ssh-key
-            path: authorized_keys
-            mode: 0644
-      - name: config-volume
-        emptyDir: {}
-      securityContext:
-        runAsNonRoot: false  # SSH server needs to run as root initially
-        fsGroup: 1000
